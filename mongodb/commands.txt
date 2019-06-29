@@ -1,0 +1,121 @@
+# conectar no banco de dados
+>> mongo 
+
+# listar todos os bancos de dados
+> show dbs 
+
+# entrar em um banco dados (o banco de dados será criado se não existir)
+> use aula 
+
+# criando um documento na coleção albuns
+> db.albuns.insert({"name": "Wwww"})
+
+# listando as collections
+> show collections
+
+# listando todos os albuns
+> db.albuns.find()
+
+# inserindo um novo album
+> db.albuns.insert({
+	"nome": "The Dark Side of the Moon",
+	"data":  new Date(1973, 3, 29)
+})
+
+# listando todos os albuns
+> db.albuns.find()
+
+# listando todos os albuns de forma 'amigável'
+> db.albuns.find().pretty()
+
+# filtra todos os albuns com o nome 'The Dark Side of the Moon'
+> db.albuns.find({"nome": "The Dark Side of the Moon"}).pretty()
+
+# remove todos os albuns com o nome 'The Dark Side of the Moon'
+> db.albuns.remove({"nome": "The Dark Side of the Moon"})
+
+# insere um novo album
+> db.albuns.insert({
+	"nome": "The Dark Side of the Moon",
+	"data":  new Date(1973, 3, 29)
+})
+
+# atualiza o album existente
+> db.albuns.update({"nome": "The Dark Side of the Moon"}, {$set: {"nome": "The Dark"}})
+
+# listando todos os albuns
+> db.albuns.find().pretty()
+
+# inserindo um novo album
+> db.albuns.insert({ "nome": "Cat", "duracao":  1 })
+
+> db.albuns.insert({ "nome": "Dog", "duracao":  2 })
+
+# lista de filtros no mongodb
+###############################################
+$gt  # maior que
+$gte # maior ou igual a
+$in  # quaisquer valores em uma lista
+$lt  # menor que
+$lte # menor ou igual a
+$ne  # não são iguais
+$nin # não existem
+###############################################
+
+# filtrando todos os albuns com duração menor que 2
+> db.albuns.find({"duracao": {$lt: 2}}).pretty()
+
+# filtrando todos os albuns com o valor da duração presente na lista [1, 2]
+> db.albuns.find({"duracao": {$in: [1, 2]}}).pretty()
+
+# filtrando todos os albuns com a data anterior a data 01/01/1990
+> db.albuns.find({"data": {$lt: new Date(1990, 1, 1)}}).pretty()
+
+# concatenando filtros no mongodb
+################################################
+$and # ambas as condições verdadeiras
+$or  # pelo menos uma das condições verdadeiras 
+$nor # ambas as condições devem ser falsas
+$not # inverte o resultado da condição
+################################################
+
+# filtrando todos os albuns com data inferior a 01/01/1990 e duração maior ou iguail a 1
+> db.albuns.find({
+	$and: [
+		{"data": {$lt: new Date(1990, 1, 1)}},
+		{"duracao": {$gte: 1}}
+	]
+}).pretty()
+
+# inserindo uma lista de artistas
+> db.artistas.insert([
+	{"nome": "Metallica"},
+	{"nome": "Slayer"},
+	{"nome": "Nirvana"}
+])
+
+# listando todos os artistas
+> db.artistas.find().pretty()
+
+# listando todos os albuns
+> db.albuns.find().pretty()
+
+> db.albuns.update(
+	{
+		"nome": "The Dark"
+	}, 
+	{
+		$set: {"artista_id": ObjectId("5d052aa81e401fe87eb14e67")}
+	}
+)
+
+db.albuns.find().pretty({"nome": "The Dark"})
+
+# criando variáveis Javascript no mongodb
+var artista = db.artistas.findOne({"nome" : "Metallica"});
+var albuns = db.albuns.find({"artista_id": artista._id});
+
+
+
+
+

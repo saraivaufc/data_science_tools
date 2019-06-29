@@ -1,0 +1,8 @@
+# entrando no redis
+redis-cli
+
+# cria uma nova chave
+set usuario1 "00111"
+
+# buscando uma chave existente
+get usuario1

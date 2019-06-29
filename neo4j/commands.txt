@@ -1,0 +1,143 @@
+#cria um músico
+CREATE (dylan: Musico{nome: 'Bob Dylan', data_de_nascimento: '1941-05-24'})
+
+#cria outro músico
+CREATE (hendrix: Musico{nome: 'Jimi Hendrix'})
+
+# criar uma nova música
+CREATE (al_along: Musica{nome: 'All Along the Watchtower'})
+
+# cria um relacionamento
+MATCH (hendrix: Musico{nome: 'Jimi Hendrix'}), (al_along: Musica{nome: 'All Along the Watchtower'})
+CREATE (hendrix)-[r:GRAVOU]->(al_along)
+
+# listar todos os músicos no banco de dados
+MATCH (m: Musico) 
+RETURN m.nome
+
+# retorna todo o gráfico
+MATCH (m)
+RETURN m 
+
+# filtra o músico 'Bob Dylan'
+MATCH (m: Musico)
+WHERE m.nome = 'Bob Dylan'
+RETURN m 
+
+# filtra o músico 'Bob Dylan'
+MATCH (m: Musico{nome: 'Bob Dylan'})
+RETURN m
+
+# cria dois relacionamentos, gravou e compos
+MATCH (bob: Musico{nome: 'Bob Dylan'}), (al_along: Musica{nome: 'All Along the Watchtower'})
+CREATE (bob)-[r:GRAVOU]->(al_along)
+CREATE (bob)-[s:COMPOS]->(al_along)
+
+# Retorna todos os nós de relacionamentos sem especificar direção
+MATCH (n1)-[]-()
+RETURN n1
+
+
+# Retorna todos os nós de relacionamentos especificando direção, ou seja, todos os nós que possuem arestas incidentes
+MATCH (n1)<-[]-()
+RETURN n1
+
+# Retorna todos os nós de relacionamentos especificando direção, ou seja, todos os nós que possuem arestas saindo dele
+MATCH (n1)-[]->()
+RETURN n1
+
+
+# Retorna todos os nós de relacionamentos especificando direção, ou seja, todos os nós que possuem arestas saindo dele
+MATCH (n1)-[]->()
+RETURN n1
+
+# Retorna todos os nós e seus relacionamentos
+MATCH (n1: Musico)-[r]-(n2:Musica)
+RETURN n1, type(r), n2
+
+# Retorna todos os músicos que gravam alguma música
+MATCH (n1: Musico)-[r: GRAVOU]-(n2:Musica)
+RETURN n1, type(r), n2
+
+# Editar um nó existente (adicionar um atributo)
+MATCH (hendrix: Musico{nome: 'Jimi Hendrix'})
+SET hendrix.data_de_nascimento = '1942-11-27'
+
+# Excluir um atributo de nó existente
+MATCH (hendrix: Musico{nome: 'Jimi Hendrix'})
+SET hendrix.data_de_nascimento = null
+RETURN hendrix
+
+# Excluir um nó existente
+MATCH (hendrix: Musico{nome: 'Jimi Hendrix'})
+DELETE hendrix
+# não pode exluir um nó que possui relacionamentos
+
+# Listar todos os relaciosamentos de 'Jimi Hendrix'
+MATCH (hendrix: Musico{nome: 'Jimi Hendrix'})-[r]-()
+RETURN hendrix, type(r)
+
+# Excluir todos os relaciosamentos de 'Jimi Hendrix'
+MATCH (hendrix: Musico{nome: 'Jimi Hendrix'})-[r]-()
+DELETE r
+
+# Excluir novamente um nó existente
+MATCH (hendrix: Musico{nome: 'Jimi Hendrix'})
+DELETE hendrix
+
+# Para evitar criar nós duplicados usamos o comando MERGE
+# o primeiro MERGE funcionará como CREATE
+MERGE (dylan: Musico{nome: 'Bob Dylan', data_de_nascimento: '1941-05-24'})
+MERGE (dylan: Musico{nome: 'Bob Dylan', data_de_nascimento: '1941-05-24'})
+
+# ****************** composicoes.csv ******************
+compositor, musica
+Bob Dilan, Hello
+Maik Jack, Triller
+Lady Gaga, Paparazzi
+
+# *****************************************
+
+# ****************** interpretes.csv ******************
+interprete, musica
+Bob Dilan, Hello
+Maik Jack, Triller
+Lady Gaga, Paparazzi
+
+# *****************************************
+
+# Exibindo CSV no Neo4j
+LOAD CSV WITH HEADERS 
+FROM *file:///composicoes.csv*
+AS linha
+RETURN linha
+
+# Carregar CSV composicoes.csv
+LOAD CSV WITH HEADERS 
+FROM *file:///composicoes.csv*
+AS linha
+MERGE (compositor: Musico {nome: linha.compositor})
+MERGE (musica: Musica {nome: linha.musica})
+MERGE (compositor)-[:COMPOS]->(musica)
+
+# Carregar CSV interpretes.csv
+LOAD CSV WITH HEADERS 
+FROM *file:///interpretes.csv*
+AS linha
+MERGE (interprete: Musico {nome: linha.interprete})
+MERGE (musica: Musica {nome: linha.musica})
+MERGE (interprete)-[:GRAVOU]->(musica)
+
+# retorna todos os músicos que gravaram alguma música
+MATCH (i: Musico)-[g:GRAVOU]->(m:Musica)
+RETURN i, m
+
+# Retorna todas os interpretes, com suas músicas e compositores de suas músicas
+MATCH (interprete:Musico)-[gravou: GRAVOU]->(musica: Musica)
+MATCH (compositor:Musico)-[compos: COMPOS]->(musica: Musica)
+RETURN interprete, musica, compositor
+
+# Retorne todos os compositores e músicas, das músicas gravadas por "Jon Bom Jovi"
+MATCH (interprete:Musico:{nome: "Jon Bom Jovi"})-[gravou: GRAVOU]->(musica: Musica)
+MATCH (compositor:Musico)-[compos: COMPOS]->(musica: Musica)
+RETURN interprete, musica, compositor

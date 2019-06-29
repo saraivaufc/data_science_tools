@@ -1,0 +1,77 @@
+# entrar no shell do casandra
+cqlsh 
+
+# listar todos os banco de dados
+describe keyspaces 
+
+# criar um novo banco de dados
+# SimpleStrategy não considera a topologia
+# NetworkTopologyStrategy considera a topologia
+CREATE KEYSPACE Aula WITH REPLICATION = {'class': 'SimpleStrategy', 'replication_factor': '3'};
+
+# começa a utilizar o banco de dados aula
+use aula; 
+
+# cria uma nova tabela no banco de dados aula
+create table musicas(id uuid PRIMARY KEY, nome text, album text, artista text); 
+
+# lista todas as tabelas
+describe tables 
+
+# lista todas as musicas
+select * musicas; 
+
+# Inserir uma nova música (usando TIME TO LIVE de 10 segundos)
+INSERT INTO musicas (id, nome, album, artista) VALUES (uuid(), 'The Nigth Before', 'Help!', 'Beatles') using ttl 10;
+
+# Inserir uma nova música
+INSERT INTO musicas (id, nome, album, artista) VALUES (uuid(), 'The Nigth Before', 'Help!', 'Beatles');
+
+# filtrar músicas por artista
+select * from musicas where artista='Beatles' ALLOW FILTERING;
+
+# filtrar músicas por album
+select * from musicas where album='Help!' ALLOW FILTERING;
+
+# cria um índice na coluna artista da tabela musica
+create index on musicas (artista); 
+
+# listar todas as músicas do artista 'Beatles'
+select * from musicas where artista='Beatles';
+
+# implementando uma playlist
+create table playlist_atual (
+	id_playlist int, 
+	posicao int, 
+	id_musica uuid, 
+	nome text,
+	album text, 
+	artista text, 
+	PRIMARY KEY(id_playlist, posicao)
+);
+
+# Inserindo uma nova playlist 
+insert into playlist_atual (id_playlist, posicao, id_musica, nome, album, artista) 
+	values (1, 1, 8ba96f53-961a-481d-9f5b-a567146c10f6, 'Blackbird', 'The Beatles', 'Beatles');
+
+# implementando uma playlist versionada
+create table playlist_versionada(
+	id_playlist int, 
+	versao int, 
+	modificacao text,
+	PRIMARY KEY(id_playlist, versao)
+) WITH COMPACT STORAGE;
+
+INSERT INTO playlist_versionada (id_playlist, versao, modificacao) VALUES (1, 1, 'ADI(Help!)');
+
+INSERT INTO playlist_versionada (id_playlist, versao, modificacao) VALUES (1, 2, 'ADI(Yesterday)');
+
+INSERT INTO playlist_versionada (id_playlist, versao, modificacao) VALUES (1, 3, 'ADI(Blackbird)');
+
+
+CREATE TABLE playlist(
+	id int PRIMARY KEY, 
+	nome text 
+);
+
+INSERT INTO playlist (id, nome) VALUES (1, 'Beatles Forever');
